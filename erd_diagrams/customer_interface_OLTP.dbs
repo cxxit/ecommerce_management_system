@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="e-commerce-management-system-customer-interface" database="LogicalDesign" id="93d24785-eb29-4249-aa96-ddfb55ba7396" >
+	<comment><![CDATA[The logical model of the customer business operations of the e commerce system]]></comment>
+	<schema name="e-commerce-management-system-customer-interface" >
+		<table name="Product" prior="Product " >
+			<column name="prod_id" type="BIGINT" mandatory="y" >
+				<comment><![CDATA[Product ID]]></comment>
+			</column>
+			<column name="prod_name" type="VARCHAR" length="100" mandatory="y" >
+				<comment><![CDATA[Product Name]]></comment>
+			</column>
+			<column name="prod_desc" type="VARCHAR" length="255" >
+				<comment><![CDATA[Product Description]]></comment>
+			</column>
+			<column name="prod_price" type="NUMERIC" length="12" decimal="2" mandatory="y" >
+				<comment><![CDATA[Product Price]]></comment>
+			</column>
+			<column name="prod_stock" type="INT" mandatory="y" >
+				<comment><![CDATA[Product Available Inventory Quantity]]></comment>
+			</column>
+			<column name="prod_category" type="VARCHAR" length="50" mandatory="y" >
+				<comment><![CDATA[Product Category]]></comment>
+			</column>
+			<column name="prod_image_url" type="TEXT" mandatory="y" >
+				<comment><![CDATA[URL of product image]]></comment>
+			</column>
+			<column name="prod_uploaded_at" type="DATETIME" mandatory="y" >
+				<defo><![CDATA[systimestamp]]></defo>
+				<comment><![CDATA[When the product was first uploaded]]></comment>
+			</column>
+			<column name="prod_updated_at" type="DATETIME" mandatory="y" >
+				<defo><![CDATA[systimestamp]]></defo>
+				<comment><![CDATA[When the product was last updated]]></comment>
+			</column>
+			<column name="seller_id" type="BIGINT" mandatory="y" >
+				<comment><![CDATA[Seller ID]]></comment>
+			</column>
+			<index name="pk_Product " unique="PRIMARY_KEY" >
+				<column name="prod_id" />
+			</index>
+			<constraint name="chk_product_prod_price" >
+				<string><![CDATA['prod_price > 0']]></string>
+			</constraint>
+			<constraint name="chk_product_prod_stock" >
+				<string><![CDATA['prod_stock > 0']]></string>
+			</constraint>
+		</table>
+		<table name="customer" prior="custo" >
+			<column name="cust_id" type="BIGINT" mandatory="y" >
+				<comment><![CDATA[Customer ID]]></comment>
+			</column>
+			<column name="cust_first_name" type="VARCHAR" length="100" mandatory="y" >
+				<comment><![CDATA[Customer First Name]]></comment>
+			</column>
+			<column name="cust_last_name" type="VARCHAR" length="100" mandatory="y" >
+				<comment><![CDATA[Customer Last Name]]></comment>
+			</column>
+			<column name="cust_username" type="VARCHAR" length="100" mandatory="y" >
+				<comment><![CDATA[Customer Username in the Ecommerce System]]></comment>
+			</column>
+			<column name="cust_email" type="VARCHAR" length="255" mandatory="y" >
+				<comment><![CDATA[Customer Email]]></comment>
+			</column>
+			<column name="cust_gender" type="CHAR" length="1" >
+				<comment><![CDATA[Customer Gender]]></comment>
+			</column>
+			<column name="cust_birth_date" type="DATE" mandatory="y" >
+				<comment><![CDATA[Customer Birth Date]]></comment>
+			</column>
+			<index name="pk_customer" unique="PRIMARY_KEY" >
+				<column name="cust_id" />
+			</index>
+			<index name="uk_customer_cust_username" unique="UNIQUE_KEY" >
+				<column name="cust_username" />
+			</index>
+			<index name="uk_customer_cust_email" unique="UNIQUE_KEY" >
+				<column name="cust_email" />
+			</index>
+			<constraint name="chk_customer_cust_gender" >
+				<string><![CDATA['cust_gender = F' or 'cust_gender = M' or 'cust_gender = NULL']]></string>
+				<comment><![CDATA[Ensure that customer gender is either the valid gender type or NULL values only]]></comment>
+			</constraint>
+		</table>
+		<table name="orders" prior="ord" >
+			<comment><![CDATA[Order Table stores orders made by Customers]]></comment>
+			<column name="order_id" type="BIGINT" mandatory="y" >
+				<comment><![CDATA[Order ID]]></comment>
+			</column>
+			<column name="order_date" type="DATE" mandatory="y" />
+			<column name="order_payment_status" prior="order_status" type="VARCHAR" length="50" mandatory="y" />
+			<column name="order_total_amount" type="NUMERIC" length="12" decimal="2" mandatory="y" >
+				<comment><![CDATA[Total cost of the order]]></comment>
+			</column>
+			<column name="cust_id" type="BIGINT" mandatory="y" >
+				<comment><![CDATA[Customer ID]]></comment>
+			</column>
+			<index name="pk_orders" unique="PRIMARY_KEY" >
+				<column name="order_id" />
+				<column name="cust_id" />
+			</index>
+			<constraint name="chk_orders_order_status" options="" >
+				<string><![CDATA['order_payment_status = Payment Pending' or 'order_payment_status = Payment Made' or 'order_payment_status = Abandoned']]></string>
+				<comment><![CDATA[To ensure orer status is either 'Payment Pending', 'Payment Made', 'Abandoned']]></comment>
+			</constraint>
+			<fk name="fk_orders_customer" to_schema="e-commerce-management-system-customer-interface" to_table="customer" type="Identifying" mandatory="y" cardinality="OneMore" range_from="0" range_to="0" options="" >
+				<fk_column name="cust_id" pk="cust_id" />
+			</fk>
+		</table>
+	</schema>
+	<diagram_group name="Default" id="d3bdffc6-91d1-4b9e-897c-1ccd22aec9f2" >
+		<diagram name="Default Diagram" id="69b7e90b-a489-47c0-b2a4-c1f5412efe04" show_relation="columns" >
+			<entity schema="e-commerce-management-system-customer-interface" name="Product" color="3986C1" x="988" y="190" />
+			<entity schema="e-commerce-management-system-customer-interface" name="customer" color="C1D8EE" x="228" y="209" />
+			<entity schema="e-commerce-management-system-customer-interface" name="orders" color="C1D8EE" x="570" y="209" />
+			<callout x="57" y="57" pointer="Round" >
+				<comment><![CDATA[- Create new entities by right-clicking the diagram. 
+- Double-click entity headers to edit.
+- Get a better understanding of the schema by creating multiple diagrams.
+- Convert the logical design to physical design and deploy it into the database.]]></comment>
+			</callout>
+		</diagram>
+	</diagram_group>
+</project>

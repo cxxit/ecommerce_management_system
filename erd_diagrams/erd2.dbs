@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="e-commerce-management-system-customer-interface" database="PostgreSQL" notation_strict="true" id="38895291-ba29-45e6-9055-98e7484779a4" >
+	<comment><![CDATA[The logical model of the customer business operations of the e commerce system]]></comment>
+	<schema name="e-commerce-management-system-customer-interface" >
+		<table name="cart" prior="ca" >
+			<column name="cart_id" type="bigint" mandatory="y" />
+			<column name="cust_id" type="bigint" mandatory="y" />
+			<index name="pk_cart" unique="PRIMARY_KEY" >
+				<column name="cart_id" />
+			</index>
+			<fk name="fk_cart_customer" to_schema="e-commerce-management-system-customer-interface" to_table="customer" >
+				<fk_column name="cust_id" pk="cust_id" />
+			</fk>
+		</table>
+		<table name="cart_product" prior="cart_prod" >
+			<column name="cp_id" prior="cart_prod_id" type="bigint" mandatory="y" />
+			<column name="cp_quantity" type="integer" mandatory="y" >
+				<comment><![CDATA[Number of units added to cart]]></comment>
+			</column>
+			<column name="cart_id" type="bigint" mandatory="y" />
+			<column name="prod_id" type="bigint" mandatory="y" />
+			<index name="pk_cart_product" unique="PRIMARY_KEY" >
+				<column name="cp_id" />
+			</index>
+			<fk name="fk_cart_product_cart" to_schema="e-commerce-management-system-customer-interface" to_table="cart" >
+				<fk_column name="cart_id" pk="cart_id" />
+			</fk>
+			<fk name="fk_cart_product_product" to_schema="e-commerce-management-system-customer-interface" to_table="product" >
+				<fk_column name="prod_id" pk="prod_id" />
+			</fk>
+		</table>
+		<table name="customer" prior="custo" >
+			<column name="cust_id" type="bigint" mandatory="y" >
+				<comment><![CDATA[Customer ID]]></comment>
+			</column>
+			<column name="cust_first_name" type="varchar" length="100" mandatory="y" >
+				<comment><![CDATA[Customer First Name]]></comment>
+			</column>
+			<column name="cust_last_name" type="varchar" length="100" mandatory="y" >
+				<comment><![CDATA[Customer Last Name]]></comment>
+			</column>
+			<column name="cust_username" type="varchar" length="100" mandatory="y" >
+				<comment><![CDATA[Customer Username in the Ecommerce System]]></comment>
+			</column>
+			<column name="cust_email" type="varchar" length="255" mandatory="y" >
+				<comment><![CDATA[Customer Email]]></comment>
+			</column>
+			<column name="cust_gender" type="char" length="1" >
+				<comment><![CDATA[Customer Gender]]></comment>
+			</column>
+			<column name="cust_birth_date" type="date" mandatory="y" >
+				<comment><![CDATA[Customer Birth Date]]></comment>
+			</column>
+			<column name="lower(cust_username)" type="text" spec="functional" />
+			<column name="lower(cust_email)" type="text" spec="functional" />
+			<index name="pk_customer" unique="PRIMARY_KEY" >
+				<column name="cust_id" />
+			</index>
+			<index name="uk_customer_cust_username" unique="UNIQUE_KEY" >
+				<column name="cust_username" />
+				<column name="lower(cust_username)" />
+			</index>
+			<index name="uk_customer_cust_email" unique="UNIQUE_KEY" >
+				<column name="cust_email" />
+				<column name="lower(cust_email)" />
+			</index>
+			<constraint name="chk_customer_cust_gender" >
+				<string><![CDATA['cust_gender = F' or 'cust_gender = M' or 'cust_gender = NULL']]></string>
+				<comment><![CDATA[Ensure that customer gender is either the valid gender type or NULL values only]]></comment>
+			</constraint>
+		</table>
+		<table name="order_product" prior="order_prod" >
+			<column name="op_id" prior="order_product_id" type="bigint" mandatory="y" />
+			<column name="op_unit_price" type="numeric" length="12" decimal="2" mandatory="y" >
+				<comment><![CDATA[Product pricce at time of purchase]]></comment>
+			</column>
+			<column name="op_quantity" type="integer" mandatory="y" >
+				<comment><![CDATA[Quantity pruchased]]></comment>
+			</column>
+			<column name="order_id" type="bigint" mandatory="y" />
+			<column name="prod_id" type="bigint" mandatory="y" />
+			<index name="pk_order_product" unique="PRIMARY_KEY" >
+				<column name="op_id" />
+			</index>
+			<fk name="fk_order_product_orders" to_schema="e-commerce-management-system-customer-interface" to_table="orders" >
+				<fk_column name="order_id" pk="order_id" />
+			</fk>
+			<fk name="fk_order_product_product" to_schema="e-commerce-management-system-customer-interface" to_table="product" >
+				<fk_column name="prod_id" pk="prod_id" />
+			</fk>
+		</table>
+		<table name="orders" prior="ord" >
+			<comment><![CDATA[Order Table stores orders made by Customers]]></comment>
+			<column name="order_id" type="bigint" mandatory="y" >
+				<comment><![CDATA[Order ID]]></comment>
+			</column>
+			<column name="order_date" type="date" mandatory="y" />
+			<column name="order_payment_status" prior="order_status" type="varchar" length="50" mandatory="y" />
+			<column name="order_total_amount" type="numeric" length="12" decimal="2" mandatory="y" >
+				<comment><![CDATA[Total cost of the order]]></comment>
+			</column>
+			<column name="cust_id" type="bigint" mandatory="y" >
+				<comment><![CDATA[Customer ID]]></comment>
+			</column>
+			<index name="pk_orders" unique="PRIMARY_KEY" >
+				<column name="order_id" />
+				<column name="cust_id" />
+			</index>
+			<index name="unq_order_id" unique="UNIQUE_KEY" >
+				<column name="order_id" />
+			</index>
+			<constraint name="chk_orders_order_status" options="" >
+				<string><![CDATA['order_payment_status = Payment Pending' or 'order_payment_status = Payment Made' or 'order_payment_status = Abandoned']]></string>
+				<comment><![CDATA[To ensure orer status is either 'Payment Pending', 'Payment Made', 'Abandoned']]></comment>
+			</constraint>
+			<fk name="fk_orders_customer" to_schema="e-commerce-management-system-customer-interface" to_table="customer" options="" >
+				<fk_column name="cust_id" pk="cust_id" />
+			</fk>
+		</table>
+		<table name="product" prior="Product" >
+			<column name="prod_id" type="bigint" mandatory="y" >
+				<comment><![CDATA[Product ID]]></comment>
+			</column>
+			<column name="prod_name" type="varchar" length="100" mandatory="y" >
+				<comment><![CDATA[Product Name]]></comment>
+			</column>
+			<column name="prod_desc" type="varchar" length="255" >
+				<comment><![CDATA[Product Description]]></comment>
+			</column>
+			<column name="prod_price" type="numeric" length="12" decimal="2" mandatory="y" >
+				<comment><![CDATA[Product Price]]></comment>
+			</column>
+			<column name="prod_stock" type="integer" mandatory="y" >
+				<comment><![CDATA[Product Available Inventory Quantity]]></comment>
+			</column>
+			<column name="prod_category" type="varchar" length="50" mandatory="y" >
+				<comment><![CDATA[Product Category]]></comment>
+			</column>
+			<column name="prod_image_url" type="text" mandatory="y" >
+				<comment><![CDATA[URL of product image]]></comment>
+			</column>
+			<column name="prod_uploaded_at" type="timestamp" mandatory="y" >
+				<defo><![CDATA[systimestamp]]></defo>
+				<comment><![CDATA[When the product was first uploaded]]></comment>
+			</column>
+			<column name="prod_updated_at" type="timestamp" mandatory="y" >
+				<defo><![CDATA[systimestamp]]></defo>
+				<comment><![CDATA[When the product was last updated]]></comment>
+			</column>
+			<column name="seller_id" type="bigint" mandatory="y" >
+				<comment><![CDATA[Seller ID]]></comment>
+			</column>
+			<index name="pk_product" unique="PRIMARY_KEY" >
+				<column name="prod_id" />
+			</index>
+			<constraint name="chk_product_prod_price" >
+				<string><![CDATA['prod_price > 0']]></string>
+			</constraint>
+			<constraint name="chk_product_prod_stock" >
+				<string><![CDATA['prod_stock > 0']]></string>
+			</constraint>
+			<fk name="fk_product_seller" to_schema="e-commerce-management-system-customer-interface" to_table="seller" >
+				<fk_column name="seller_id" pk="seller_id" />
+			</fk>
+		</table>
+		<table name="seller" prior="sel" >
+			<comment><![CDATA[Table stores all seller that sells product on the ecommerce system]]></comment>
+			<column name="seller_id" type="bigint" mandatory="y" >
+				<comment><![CDATA[Seller ID]]></comment>
+			</column>
+			<column name="seller_first_name" type="varchar" length="100" mandatory="y" >
+				<comment><![CDATA[Seller First Name]]></comment>
+			</column>
+			<column name="seller_last_name" type="varchar" length="100" mandatory="y" >
+				<comment><![CDATA[Seller Last Name]]></comment>
+			</column>
+			<column name="seller_email" type="varchar" length="255" mandatory="y" >
+				<comment><![CDATA[Seller Email]]></comment>
+			</column>
+			<column name="seller_desc" type="varchar" length="500" mandatory="y" >
+				<comment><![CDATA[Description of Seller Business]]></comment>
+			</column>
+			<column name="seller_created_at" type="timestamp" mandatory="y" >
+				<defo><![CDATA[systimestamp]]></defo>
+				<comment><![CDATA[Accout created at]]></comment>
+			</column>
+			<column name="seller_business_name" type="varchar" length="100" mandatory="y" >
+				<comment><![CDATA[Public business store name]]></comment>
+			</column>
+			<column name="lower(seller_business_name)" type="text" spec="functional" />
+			<column name="lower(cust_email)" type="text" spec="functional" />
+			<index name="pk_seller" unique="PRIMARY_KEY" >
+				<column name="seller_id" />
+			</index>
+			<index name="uk_seller_seller_business_name" unique="UNIQUE_KEY" >
+				<column name="seller_business_name" />
+				<column name="lower(seller_business_name)" />
+			</index>
+			<index name="uk_seller_seller_email" unique="UNIQUE_KEY" >
+				<column name="seller_email" />
+				<column name="lower(cust_email)" />
+			</index>
+		</table>
+	</schema>
+	<schema name="public" catalogname="postgres" >
+		<comment><![CDATA[standard public schema]]></comment>
+		<function name="rls_auto_enable" id="832b23e9-649e-4d97-8b2d-e17fc54ba594" isSystem="false" params_known="n" >
+			<string><![CDATA[CREATE OR REPLACE FUNCTION public.rls_auto_enable()
+ RETURNS event_trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'pg_catalog'
+AS $function$
+DECLARE
+  cmd record;
+  tbl name;
+BEGIN
+  FOR cmd IN
+    SELECT *
+    FROM pg_event_trigger_ddl_commands()
+    WHERE command_tag IN ('CREATE TABLE', 'CREATE TABLE AS', 'SELECT INTO')
+      AND object_type IN ('table','partitioned table')
+  LOOP
+     IF cmd.schema_name IS NOT NULL AND cmd.schema_name IN ('public') AND cmd.schema_name NOT IN ('pg_catalog','information_schema') AND cmd.schema_name NOT LIKE 'pg_toast%' AND cmd.schema_name NOT LIKE 'pg_temp%' THEN
+      BEGIN
+        SELECT c.relname INTO tbl FROM pg_catalog.pg_class c WHERE c.oid = cmd.objid;
+        EXECUTE format('alter table if exists %I.%I enable row level security', cmd.schema_name, tbl);
+        RAISE LOG 'rls_auto_enable: enabled RLS on %', cmd.object_identity;
+      EXCEPTION
+        WHEN OTHERS THEN
+          RAISE LOG 'rls_auto_enable: failed to enable RLS on %', cmd.object_identity;
+      END;
+     ELSE
+        RAISE LOG 'rls_auto_enable: skip % (either system schema or not in enforced list: %.)', cmd.object_identity, cmd.schema_name;
+     END IF;
+  END LOOP;
+END;
+$function$;]]></string>
+		</function>
+	</schema>
+	<diagram_group name="Default" id="a70046aa-a218-4e1e-8a16-f353d90f0001" >
+		<diagram name="Default Diagram" id="79dae90f-ec31-478e-be4c-58318e125e88" confirmed="y" show_relation="columns" >
+			<entity schema="e-commerce-management-system-customer-interface" name="cart" color="C1D8EE" x="608" y="247" />
+			<entity schema="e-commerce-management-system-customer-interface" name="cart_product" color="C1D8EE" x="893" y="228" />
+			<entity schema="e-commerce-management-system-customer-interface" name="customer" color="C1D8EE" x="209" y="494" />
+			<entity schema="e-commerce-management-system-customer-interface" name="order_product" color="C1D8EE" x="950" y="494" />
+			<entity schema="e-commerce-management-system-customer-interface" name="orders" color="C1D8EE" x="551" y="494" />
+			<entity schema="e-commerce-management-system-customer-interface" name="product" color="3986C1" x="1273" y="437" />
+			<entity schema="e-commerce-management-system-customer-interface" name="seller" color="C1D8EE" x="1292" y="893" />
+			<callout x="57" y="57" pointer="Round" >
+				<comment><![CDATA[- Create new entities by right-clicking the diagram. 
+- Double-click entity headers to edit.
+- Get a better understanding of the schema by creating multiple diagrams.
+- Convert the logical design to physical design and deploy it into the database.]]></comment>
+			</callout>
+		</diagram>
+	</diagram_group>
+</project>
