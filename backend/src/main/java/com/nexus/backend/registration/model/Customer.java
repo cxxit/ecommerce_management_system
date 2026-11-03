@@ -21,7 +21,7 @@ public class Customer {
     @Column("cust_email")
     private String email;
     @Column("cust_gender")
-    private String gender;
+    private Gender gender;
     @Column("cust_birth_date")
     private LocalDate birthDate;
 
@@ -30,7 +30,7 @@ public class Customer {
             String firstName,
             String lastName,
             String email,
-            String gender,
+            Gender gender,
             LocalDate birthDate
     ) {
         this.uuid = uuid;
@@ -61,7 +61,7 @@ public class Customer {
         return email;
     }
 
-    public String getGender() {
+    public Gender getGender() {
         return gender;
     }
 
