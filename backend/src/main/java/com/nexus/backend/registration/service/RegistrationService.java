@@ -6,6 +6,7 @@ import com.nexus.backend.registration.model.Customer;
 import com.nexus.backend.registration.model.UserAccount;
 import com.nexus.backend.registration.repository.CustomerRepository;
 import com.nexus.backend.registration.repository.UserAccountRepository;
+import org.springframework.data.jdbc.core.JdbcAggregateTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,14 +17,17 @@ public class RegistrationService {
 
     private final UserAccountRepository userAccountRepository; // stores references to the repositories
     private final CustomerRepository customerRepository;
+    private final JdbcAggregateTemplate jdbcAggregateTemplate;
 
     // the constructor is so that allow spring to inject the repositories automatically
     public RegistrationService (
             UserAccountRepository userAccountRepository,
-            CustomerRepository customerRepository
+            CustomerRepository customerRepository,
+            JdbcAggregateTemplate jdbcAggregateTemplate
     ) {
         this.userAccountRepository = userAccountRepository;
         this.customerRepository = customerRepository;
+        this.jdbcAggregateTemplate = jdbcAggregateTemplate;
     }
 
     @Transactional
@@ -51,6 +55,9 @@ public class RegistrationService {
                 request.gender(),
                 request.birthDate()
         );
+
+        jdbcAggregateTemplate.insert(userAccount);
+        customerRepository.save(customer);
 
 
 
