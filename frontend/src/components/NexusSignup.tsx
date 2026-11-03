@@ -50,7 +50,7 @@ const initialForm: FormState = {
   username: '',
   email: '',
   dateOfBirth: '',
-  gender: '',
+  gender: 'PREFER_NOT_TO_SAY',
   password: '',
   confirmPassword: ''
 };
@@ -509,8 +509,6 @@ export const NexusSignup = () => {
     return Object.keys(initialForm).every(field => {
       const fieldName = field as FieldName;
 
-      // Gender is optional
-      if (fieldName === 'gender') return true;
 
       // Check required fields
       if (!form[fieldName]) return false;
@@ -570,7 +568,7 @@ export const NexusSignup = () => {
               return;
             }
 
-            const response = await fetch("http://localhost:8000/api/registration", {
+            const response = await fetch("http://localhost:8080/api/registration", {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
@@ -683,7 +681,23 @@ export const NexusSignup = () => {
                       ...v,
                       dateOfBirth: true
                     }))} />{fieldError('dateOfBirth') && <span className="mt-1 block text-xs text-red-300">{fieldError('dateOfBirth')}</span>}</label>
-                      <label className="block text-xs font-medium text-[#E6EDF3]">Gender <span className="text-[#94A3B8]">(optional)</span><select aria-label="Gender" className={inputClass('gender')} value={form.gender} onChange={e => updateField('gender', e.target.value)}><option value="">Prefer not to say</option><option>Male</option><option>Female</option><option>Non-binary</option><option>Other</option></select></label>
+                      <label className="block text-xs font-medium text-[#E6EDF3]">
+                        Gender <span className="text-[#3DD9E8]">*</span>
+                        <select
+                            aria-label="Gender"
+                            required={true}
+                            className={inputClass('gender')}
+                            value={form.gender}
+                            onChange={e => updateField('gender', e.target.value)}
+                        >
+                          <option
+                              value="PREFER_NOT_TO_SAY">Prefer not to say</option>
+                          <option value="MALE">Male</option>
+                          <option value="FEMALE">Female</option>
+                          <option value="NON_BINARY">Non-binary</option>
+                          <option value="OTHERS">Other</option>
+                        </select>
+                      </label>
                     </div>
                     <label className="block text-xs font-medium text-[#E6EDF3]">Password <span className="text-[#3DD9E8]">*</span><span className="relative block"><input type={showPassword ? 'text' : 'password'} aria-label="Password" className={`${inputClass('password')} pr-11`} value={form.password} onChange={e => updateField('password', e.target.value)} onBlur={() => setTouched(v => ({
                       ...v,
