@@ -10,6 +10,7 @@ public class GenderWritingConverter implements Converter<Gender, PGobject> {
 
     @Override
     public PGobject convert(Gender gender) {
+        System.out.println("GenderWritingConverter called: " + gender);
         PGobject value = new PGobject();
         value.setType("gender_type");
         try {
