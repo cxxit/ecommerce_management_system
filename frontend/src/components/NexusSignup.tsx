@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent, type ReactNode } from 'react';
 import { ArrowRight, Check, Eye, EyeOff, Hexagon, LockKeyhole, ShieldCheck, Truck } from 'lucide-react';
+import { supabase } from '../lib/supabase.ts';
+
 type FormState = {
   firstName: string;
   lastName: string;
@@ -534,23 +536,74 @@ export const NexusSignup = () => {
       // !fieldError(field as FieldName) && (field === 'gender' || Boolean(form[field as FieldName])))
     });
   };
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const allTouched = Object.keys(initialForm).reduce((acc, key) => ({
-      ...acc,
-      [key]: true
-    }), {} as Partial<Record<FieldName, boolean>>);
-    setTouched(allTouched);
-    if (!isValid()) return;
-    setIsLoading(true);
-    window.setTimeout(() => {
-      console.log('NEXUS registration placeholder', form);
-      setIsLoading(false);
-      setSuccess(true);
-      // TODO: call startTransition() after Java Spring Boot POST /api/auth/register returns 201 Created.
-    }, 650);
-  };
-  const inputClass = (field: FieldName) => `mt-2 h-11 w-full rounded-md border bg-[#10151B] px-3.5 text-sm text-[#E6EDF3] outline-none transition placeholder:text-[#94A3B8]/60 focus:border-[#3DD9E8] focus:ring-2 focus:ring-[#3DD9E8]/20 ${touched[field] && fieldError(field) ? 'border-red-400' : touched[field] && form[field] ? 'border-[#3DD9E8]' : 'border-[#34414D]'}`;
+    const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+
+        const allTouched = Object.keys(initialForm).reduce(
+            (acc, key) => ({
+                ...acc,
+                [key]: true,
+            }),
+            {} as Partial<Record<FieldName, boolean>>
+        );
+
+        setTouched(allTouched);
+
+        if (!isValid()) return;
+
+        setIsLoading(true);
+
+        try {
+            const { data, error } = await supabase.auth.signUp({
+                email: form.email,
+                password: form.password,
+            });
+
+            if (error) {
+                console.error('Registration failed:', error.message);
+                return;
+            }
+
+            const accessToken = data.session?.access_token;
+            if (!accessToken) {
+              console.error('Access token not set:', accessToken);
+              return;
+            }
+
+            const response = await fetch("http://localhost:8000/api/registration", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${accessToken}`,
+
+              },
+              body: JSON.stringify({
+                username: form.username,
+                firstName: form.firstName,
+                lastName: form.lastName,
+                gender: form.gender,
+                birthDate: form.dateOfBirth
+              }),
+            });
+            if (!response.ok) {
+              console.error("Customer registration failed:", response.status);
+              return;
+            }
+            console.log('Registration request succeeded:', data.user?.id);
+
+            setSuccess(true);
+
+            // If email confirmation is enabled, the user
+            // must confirm their email before signing in.
+            // Do not start the marketplace transition yet.
+
+        } catch (error) {
+            console.error('Unexpected registration error:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+    const inputClass = (field: FieldName) => `mt-2 h-11 w-full rounded-md border bg-[#10151B] px-3.5 text-sm text-[#E6EDF3] outline-none transition placeholder:text-[#94A3B8]/60 focus:border-[#3DD9E8] focus:ring-2 focus:ring-[#3DD9E8]/20 ${touched[field] && fieldError(field) ? 'border-red-400' : touched[field] && form[field] ? 'border-[#3DD9E8]' : 'border-[#34414D]'}`;
   return <div className="min-h-screen bg-[#10151B] text-[#E6EDF3] selection:bg-[#3DD9E8]/30">
       {showMarketplace && <MarketplaceHome phase={transitionPhase} />}
       {(!showMarketplace || isTransitioning) && <div className={`transition-opacity duration-300 ease-out ${isTransitioning ? 'fixed inset-0 overflow-auto opacity-0' : 'opacity-100'}`}>
