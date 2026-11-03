@@ -1,11 +1,13 @@
-import type { Theme } from './settings/types';
-import { NexusSignup } from './components/NexusSignup';
 
-let theme: Theme = 'light';
+import { NexusSignup } from './components/NexusSignup';
+import theme from './settings/theme.ts';
 
 function App() {
-  function setTheme(theme: Theme) {
-    if (theme === 'dark') {
+  function setTheme(config: {
+    theme: 'light' | 'dark';
+    container: 'centered' | 'none';
+  }) {
+    if (config.theme === 'dark') {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
