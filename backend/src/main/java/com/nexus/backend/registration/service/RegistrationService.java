@@ -2,6 +2,8 @@ package com.nexus.backend.registration.service;
 
 
 import com.nexus.backend.registration.dto.RegistrationRequest;
+import com.nexus.backend.registration.model.Customer;
+import com.nexus.backend.registration.model.UserAccount;
 import com.nexus.backend.registration.repository.CustomerRepository;
 import com.nexus.backend.registration.repository.UserAccountRepository;
 import org.springframework.stereotype.Service;
@@ -34,5 +36,24 @@ public class RegistrationService {
         if (userAccountRepository.existsByUsername(request.username())) {
             throw new IllegalArgumentException("Username already exists");
         }
+
+        UserAccount userAccount = new UserAccount(
+                authenticatedUserId,
+                request.username(),
+                authenticatedEmail
+        );
+
+        Customer customer = new Customer(
+                authenticatedUserId,
+                request.firstName(),
+                request.lastName(),
+                authenticatedEmail,
+                request.gender(),
+                request.birthDate()
+        );
+
+
+
+
     }
 }
